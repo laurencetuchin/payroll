@@ -14,12 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 class EmployeeController {
 
     private final EmployeeRepository repository;
+    private final EmployeeModelAssembler assembler;
 
+    EmployeeController(EmployeeRepository repository, EmployeeModelAssembler assembler) {
 
-    EmployeeController(EmployeeRepository repository) {
         this.repository = repository;
+        this.assembler = assembler;
     }
-
 //    Aggregate root
 //    tag::get-aggregate-root[]
     @GetMapping("/employees")
@@ -36,11 +37,11 @@ class EmployeeController {
 
 //    Single item
 
-    @GetMapping("/employees/{id}")
-    Employee one(@PathVariable Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new EmployeeNotFoundException(id));
-    }
+//    @GetMapping("/employees/{id}")
+//    Employee one(@PathVariable Long id) {
+//        return repository.findById(id)
+//                .orElseThrow(() -> new EmployeeNotFoundException(id));
+//    }
 
     @PutMapping("/employees/{id}")
     Employee replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
@@ -60,5 +61,16 @@ class EmployeeController {
         void deleteEmployee(@PathVariable Long id) {
             repository.deleteById(id);
         }
+
+    @GetMapping("/employees/{id}")
+    EntityModel<Employee> one(@PathVariable Long id) {
+
+        Employee employee = repository.findById(id) //
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
+
+        return assembler.toModel(employee);
+    }
+
+
     }
 
